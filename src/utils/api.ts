@@ -8,50 +8,81 @@ import {
 import * as output from './output';
 import * as auth from './auth';
 
+// Store the current API URL
+let currentApiUrl = getApiUrl();
+
 // Create a base axios instance for API requests
-const api: AxiosInstance = axios.create({
-  baseURL: getApiUrl(),
+let api: AxiosInstance = axios.create({
+  baseURL: currentApiUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add request interceptor to include auth token and handle token refresh
-api.interceptors.request.use(async (config: AxiosRequestConfig) => {
-  // Skip token check for auth endpoints
-  const isAuthEndpoint = config.url?.includes('/auth/');
+// Ensure the API instance is using the correct URL
+function ensureCorrectApiUrl(): void {
+  const apiUrl = getApiUrl();
+  if (apiUrl !== currentApiUrl) {
+    // Update the stored URL
+    currentApiUrl = apiUrl;
 
-  if (!isAuthEndpoint) {
-    // Check if token needs refresh
-    if (needsTokenRefresh() && isAuthenticated()) {
-      output.info(
-        'Your session is about to expire. Refreshing authentication...',
-      );
-      try {
-        // Re-authenticate silently
-        await auth.initiateLogin();
-      } catch (error) {
-        output.warning('Failed to refresh authentication. Please login again.');
+    // Create a new API instance
+    api = axios.create({
+      baseURL: apiUrl,
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Re-add the request interceptor
+    setupRequestInterceptor();
+  }
+}
+
+// Set up the request interceptor
+function setupRequestInterceptor(): void {
+  api.interceptors.request.use(async (config: AxiosRequestConfig) => {
+    // Skip token check for auth endpoints
+    const isAuthEndpoint = config.url?.includes('/auth/');
+
+    if (!isAuthEndpoint) {
+      // Check if token needs refresh
+      if (needsTokenRefresh() && isAuthenticated()) {
+        output.info(
+          'Your session is about to expire. Refreshing authentication...',
+        );
+        try {
+          // Re-authenticate silently
+          await auth.initiateLogin();
+        } catch (error) {
+          output.warning(
+            'Failed to refresh authentication. Please login again.',
+          );
+        }
+      }
+
+      // Check if authenticated
+      if (!isAuthenticated()) {
+        output.error('Authentication required.');
+        output.info("Please run 'todo auth login' to authenticate.");
+        // We'll let the request proceed and fail with a 401
       }
     }
 
-    // Check if authenticated
-    if (!isAuthenticated()) {
-      output.error('Authentication required.');
-      output.info("Please run 'todo auth login' to authenticate.");
-      // We'll let the request proceed and fail with a 401
+    // Add token to headers if available
+    const token = getAuthToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-  }
 
-  // Add token to headers if available
-  const token = getAuthToken();
-  if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+    return config;
+  });
+}
 
-  return config;
-});
+// Set up the initial request interceptor
+setupRequestInterceptor();
 
 // API endpoints and methods
 export const endpoints = {
@@ -89,6 +120,7 @@ export async function get<T = any>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   try {
+    ensureCorrectApiUrl();
     const response: AxiosResponse<T> = await api.get(url, config);
     return response.data;
   } catch (error) {
@@ -103,6 +135,7 @@ export async function post<T = any, D = any>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   try {
+    ensureCorrectApiUrl();
     const response: AxiosResponse<T> = await api.post(url, data, config);
     return response.data;
   } catch (error) {
@@ -117,6 +150,7 @@ export async function put<T = any, D = any>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   try {
+    ensureCorrectApiUrl();
     const response: AxiosResponse<T> = await api.put(url, data, config);
     return response.data;
   } catch (error) {
@@ -130,6 +164,7 @@ export async function del<T = any>(
   config?: AxiosRequestConfig,
 ): Promise<T> {
   try {
+    ensureCorrectApiUrl();
     const response: AxiosResponse<T> = await api.delete(url, config);
     return response.data;
   } catch (error) {

@@ -149,6 +149,10 @@ export function getAuthUser():
  * Get the API URL
  */
 export function getApiUrl(): string {
+  // Clear any previously stored API URL
+  if (config.has('apiUrl')) {
+    config.delete('apiUrl');
+  }
   return 'https://todofordevs.com/api';
 }
 
