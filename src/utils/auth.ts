@@ -8,6 +8,7 @@ import {
   getAuthUser,
 } from '../config';
 import * as output from './output';
+import chalk from 'chalk';
 
 /**
  * Interface for the authentication response
@@ -58,12 +59,44 @@ export async function initiateLogin(silent: boolean = false): Promise<void> {
       // Copy the code to clipboard
       try {
         await clipboardy.write(deviceCodeResponse.user_code);
-        output.info(
-          `2. Enter this code: ${deviceCodeResponse.user_code} (copied to clipboard)`,
+
+        // Create a visually appealing banner for the code
+        const code = deviceCodeResponse.user_code;
+        const boxWidth = code.length + 8; // Add padding
+
+        console.log('\n' + chalk.cyan('┌' + '─'.repeat(boxWidth) + '┐'));
+        console.log(chalk.cyan('│') + ' '.repeat(boxWidth) + chalk.cyan('│'));
+        console.log(
+          chalk.cyan('│') +
+            ' '.repeat(4) +
+            chalk.bold(code) +
+            ' '.repeat(4) +
+            chalk.cyan('│') +
+            chalk.green(' (copied to clipboard)'),
         );
+        console.log(chalk.cyan('│') + ' '.repeat(boxWidth) + chalk.cyan('│'));
+        console.log(chalk.cyan('└' + '─'.repeat(boxWidth) + '┘') + '\n');
+
+        output.info('2. Enter the code shown above when prompted');
       } catch (clipboardError) {
         // Fallback if clipboard access fails
-        output.info(`2. Enter this code: ${deviceCodeResponse.user_code}`);
+        // Create a visually appealing banner for the code without clipboard message
+        const code = deviceCodeResponse.user_code;
+        const boxWidth = code.length + 8; // Add padding
+
+        console.log('\n' + chalk.cyan('┌' + '─'.repeat(boxWidth) + '┐'));
+        console.log(chalk.cyan('│') + ' '.repeat(boxWidth) + chalk.cyan('│'));
+        console.log(
+          chalk.cyan('│') +
+            ' '.repeat(4) +
+            chalk.bold(code) +
+            ' '.repeat(4) +
+            chalk.cyan('│'),
+        );
+        console.log(chalk.cyan('│') + ' '.repeat(boxWidth) + chalk.cyan('│'));
+        console.log(chalk.cyan('└' + '─'.repeat(boxWidth) + '┘') + '\n');
+
+        output.info('2. Enter the code shown above when prompted');
       }
 
       // Step 3: Open the browser to the verification URI (if not silent)
