@@ -149,7 +149,7 @@ export function getAuthUser():
  * Get the API URL
  */
 export function getApiUrl(): string {
-  return 'https://localhost:3000/api';
+  return 'https://todofordevs.com/api';
 }
 
 export default config;

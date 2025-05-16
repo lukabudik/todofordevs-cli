@@ -18,7 +18,11 @@ interface Task {
   assigneeEmail?: string;
   assigneeName?: string;
   projectId: string;
-  projectName?: string;
+  project?: {
+    id: string;
+    name: string;
+    ownerId?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +32,10 @@ interface Task {
  */
 interface TasksResponse {
   tasks: Task[];
+}
+
+interface SingleTaskResponse {
+  task: Task;
 }
 
 interface TaskCreationResponse {
@@ -170,7 +178,8 @@ export async function viewTask(taskId: string): Promise<void> {
     output.info(`Fetching task details for ID: ${taskId}...`);
 
     // Fetch the task
-    const task = await get<Task>(endpoints.tasks.get(taskId));
+    const response = await get<SingleTaskResponse>(endpoints.tasks.get(taskId));
+    const task = response.task;
 
     // Display task details
     output.heading('Task Details');
@@ -185,7 +194,7 @@ export async function viewTask(taskId: string): Promise<void> {
       task.assigneeEmail || task.assigneeName || 'Unassigned',
     );
     output.formatKeyValue('Project ID', task.projectId);
-    output.formatKeyValue('Project Name', task.projectName || '');
+    output.formatKeyValue('Project Name', task.project?.name || '');
     output.formatKeyValue(
       'Created At',
       new Date(task.createdAt).toLocaleString(),
@@ -210,7 +219,8 @@ export async function updateTask(taskId: string): Promise<void> {
     output.info(`Fetching task details for ID: ${taskId}...`);
 
     // Fetch the current task
-    const task = await get<Task>(endpoints.tasks.get(taskId));
+    const response = await get<SingleTaskResponse>(endpoints.tasks.get(taskId));
+    const task = response.task;
 
     // Prompt for updates
     const updates = await promptForTaskUpdates(task);
@@ -244,7 +254,10 @@ export async function deleteTask(taskId: string): Promise<void> {
     // Fetch the task to get its title
     let taskTitle = 'Unknown';
     try {
-      const task = await get<Task>(endpoints.tasks.get(taskId));
+      const response = await get<SingleTaskResponse>(
+        endpoints.tasks.get(taskId),
+      );
+      const task = response.task;
       taskTitle = task.title || 'Unknown';
     } catch (fetchError) {
       output.warning(`Could not fetch task details: ${fetchError}`);
