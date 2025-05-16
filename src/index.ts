@@ -13,7 +13,7 @@ const program = new Command();
 program
   .name('todo')
   .description('TodoForDevs CLI - A simple task management tool for developers')
-  .version('1.0.0');
+  .version('1.0.3');
 
 // Register command groups
 registerAuthCommands(program);
