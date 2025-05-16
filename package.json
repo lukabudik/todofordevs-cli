@@ -1,0 +1,39 @@
+{
+  "name": "todofordevs-cli",
+  "version": "1.0.0",
+  "description": "CLI for TodoForDevs - A simple task management tool for developers",
+  "main": "dist/index.js",
+  "bin": {
+    "todo": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postbuild": "chmod +x dist/index.js",
+    "link": "npm link"
+  },
+  "keywords": [
+    "todo",
+    "cli",
+    "task-management",
+    "developers"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.6.1",
+  "devDependencies": {
+    "@types/node": "^22.15.18",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "chalk": "4",
+    "cli-table3": "^0.6.5",
+    "commander": "^13.1.0",
+    "conf": "10",
+    "inquirer": "^12.6.1",
+    "open": "8"
+  }
+}
