@@ -1,12 +1,12 @@
-import inquirer from "inquirer";
-import { get, post, endpoints } from "./api"; // Added post
+import inquirer from 'inquirer';
+import { get, post, endpoints } from './api'; // Added post
 import {
   getActiveProject,
   setActiveProject,
   clearActiveProject,
-} from "../config";
-import * as output from "./output";
-import { requireAuth } from "./auth";
+} from '../config';
+import * as output from './output';
+import { requireAuth } from './auth';
 
 /**
  * Interface for a project
@@ -45,7 +45,7 @@ export async function listProjects(): Promise<Project[]> {
   if (!requireAuth()) return [];
 
   try {
-    output.info("Fetching projects...");
+    output.info('Fetching projects...');
 
     // Get the response from the API
     const response = await get<any>(endpoints.projects.list());
@@ -56,14 +56,14 @@ export async function listProjects(): Promise<Project[]> {
     if (Array.isArray(response)) {
       // If the response is already an array, use it directly
       projects = response;
-    } else if (response && typeof response === "object") {
+    } else if (response && typeof response === 'object') {
       // If the response is an object, check if it has a projects property
       if (Array.isArray(response.projects)) {
         projects = response.projects;
       } else {
         // If no projects property or it's not an array, try to convert the object to an array
         const possibleProjects = Object.values(response).find((val) =>
-          Array.isArray(val)
+          Array.isArray(val),
         );
         if (possibleProjects) {
           projects = possibleProjects as Project[];
@@ -72,12 +72,12 @@ export async function listProjects(): Promise<Project[]> {
     }
 
     if (projects.length === 0) {
-      output.info("No projects found.");
+      output.info('No projects found.');
       return [];
     }
 
     // Display projects in a table
-    const table = output.createTable(["ID", "Name", "Owner", "Last Updated"]);
+    const table = output.createTable(['ID', 'Name', 'Owner', 'Last Updated']);
 
     projects.forEach((project) => {
       table.push([
@@ -91,7 +91,7 @@ export async function listProjects(): Promise<Project[]> {
     console.log(table.toString());
     return projects;
   } catch (error) {
-    output.error("Failed to fetch projects.");
+    output.error('Failed to fetch projects.');
     console.error(error);
     return [];
   }
@@ -113,14 +113,14 @@ export async function selectProject(): Promise<void> {
     if (Array.isArray(response)) {
       // If the response is already an array, use it directly
       projects = response;
-    } else if (response && typeof response === "object") {
+    } else if (response && typeof response === 'object') {
       // If the response is an object, check if it has a projects property
       if (Array.isArray(response.projects)) {
         projects = response.projects;
       } else {
         // If no projects property or it's not an array, try to convert the object to an array
         const possibleProjects = Object.values(response).find((val) =>
-          Array.isArray(val)
+          Array.isArray(val),
         );
         if (possibleProjects) {
           projects = possibleProjects as Project[];
@@ -129,16 +129,16 @@ export async function selectProject(): Promise<void> {
     }
 
     if (projects.length === 0) {
-      output.info("No projects found to select from.");
+      output.info('No projects found to select from.');
       return;
     }
 
     // Prompt user to select a project
     const { selectedId } = await inquirer.prompt([
       {
-        type: "list",
-        name: "selectedId",
-        message: "Select a project to set as active:",
+        type: 'list',
+        name: 'selectedId',
+        message: 'Select a project to set as active:',
         choices: projects.map((project) => ({
           name: `${project.name} (${output.truncate(project.id, 10)})`,
           value: project.id,
@@ -154,13 +154,13 @@ export async function selectProject(): Promise<void> {
       // Set as active project
       setActiveProject(selectedProject.id, selectedProject.name);
       output.success(
-        `Project '${selectedProject.name}' (ID: ${selectedProject.id}) is now active.`
+        `Project '${selectedProject.name}' (ID: ${selectedProject.id}) is now active.`,
       );
     } else {
-      output.error("Failed to set active project. Invalid selection.");
+      output.error('Failed to set active project. Invalid selection.');
     }
   } catch (error) {
-    output.error("Failed to select project.");
+    output.error('Failed to select project.');
     console.error(error);
   }
 }
@@ -175,7 +175,7 @@ export function showCurrentProject(): void {
 
   if (activeProject) {
     output.success(
-      `Current active project: '${activeProject.name}' (ID: ${activeProject.id}).`
+      `Current active project: '${activeProject.name}' (ID: ${activeProject.id}).`,
     );
   } else {
     output.info("No active project selected. Use 'todo project select'.");
@@ -187,7 +187,7 @@ export function showCurrentProject(): void {
  * Returns undefined if no project is selected or if the user cancels
  */
 export async function getActiveProjectId(
-  projectIdOverride?: string
+  projectIdOverride?: string,
 ): Promise<string | undefined> {
   // If a project ID override is provided, use it
   if (projectIdOverride) {
@@ -201,14 +201,14 @@ export async function getActiveProjectId(
   }
 
   // No active project, prompt to select one
-  output.info("No active project set.");
+  output.info('No active project set.');
 
   // Ask if the user wants to select a project now
   const { selectNow } = await inquirer.prompt([
     {
-      type: "confirm",
-      name: "selectNow",
-      message: "Would you like to select a project now?",
+      type: 'confirm',
+      name: 'selectNow',
+      message: 'Would you like to select a project now?',
       default: true,
     },
   ]);
@@ -220,30 +220,4 @@ export async function getActiveProjectId(
   }
 
   return undefined;
-}
-
-/**
- * Create a new project
- */
-export async function createProject(name: string): Promise<Project | null> {
-  if (!requireAuth()) return null;
-  try {
-    if (!name || name.trim() === "") {
-      output.error("Project name cannot be empty.");
-      return null;
-    }
-    output.info(`Creating project "${name}"...`);
-    const response = await post<ProjectCreationResponse>(
-      endpoints.projects.create(),
-      { name }
-    );
-    output.success(
-      `${response.message} (ID: ${response.project.id}, Name: ${response.project.name})`
-    );
-    return response.project;
-  } catch (error) {
-    output.error("Failed to create project.");
-    // console.error(error); // Keep commented for prod
-    return null;
-  }
 }

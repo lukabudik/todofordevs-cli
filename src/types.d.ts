@@ -1,7 +1,7 @@
 // Type declarations for modules without type definitions
 
 // Declare conf module
-declare module "conf" {
+declare module 'conf' {
   interface ConfOptions<T> {
     projectName?: string;
     schema?: Record<string, any>;
@@ -34,20 +34,20 @@ declare module "conf" {
 }
 
 // Declare open module
-declare module "open" {
+declare module 'open' {
   function open(
     target: string,
     options?: {
       wait?: boolean;
       app?: string | string[];
-    }
+    },
   ): Promise<any>;
 
   export = open;
 }
 
 // Declare inquirer module
-declare module "inquirer" {
+declare module 'inquirer' {
   interface Question {
     type?: string;
     name: string;
@@ -56,13 +56,13 @@ declare module "inquirer" {
     choices?: any[] | ((answers: Record<string, any>) => any[]);
     validate?: (
       input: any,
-      answers?: Record<string, any>
+      answers?: Record<string, any>,
     ) => boolean | string | Promise<boolean | string>;
     filter?: (input: any, answers: Record<string, any>) => any;
     transformer?: (
       input: any,
       answers: Record<string, any>,
-      flags: { isFinal?: boolean }
+      flags: { isFinal?: boolean },
     ) => string;
     when?: boolean | ((answers: Record<string, any>) => boolean);
     pageSize?: number;
@@ -86,7 +86,7 @@ declare module "inquirer" {
 }
 
 // Declare axios module
-declare module "axios" {
+declare module 'axios' {
   export interface AxiosRequestConfig {
     baseURL?: string;
     timeout?: number;
@@ -107,26 +107,26 @@ declare module "axios" {
     (url: string, config?: AxiosRequestConfig): Promise<AxiosResponse>;
     get<T = any>(
       url: string,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig,
     ): Promise<AxiosResponse<T>>;
     post<T = any>(
       url: string,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig,
     ): Promise<AxiosResponse<T>>;
     put<T = any>(
       url: string,
       data?: any,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig,
     ): Promise<AxiosResponse<T>>;
     delete<T = any>(
       url: string,
-      config?: AxiosRequestConfig
+      config?: AxiosRequestConfig,
     ): Promise<AxiosResponse<T>>;
     interceptors: {
       request: {
         use: (
-          onFulfilled: (config: AxiosRequestConfig) => AxiosRequestConfig
+          onFulfilled: (config: AxiosRequestConfig) => AxiosRequestConfig,
         ) => void;
       };
       response: {
@@ -140,7 +140,7 @@ declare module "axios" {
 }
 
 // Declare chalk module
-declare module "chalk" {
+declare module 'chalk' {
   type ChalkFunction = (text: string) => string;
 
   interface Chalk {
@@ -158,7 +158,7 @@ declare module "chalk" {
 }
 
 // Declare commander module
-declare module "commander" {
+declare module 'commander' {
   export class Command {
     constructor(name?: string);
     name(name?: string): this;
@@ -176,7 +176,7 @@ declare module "commander" {
     requiredOption(
       flags: string,
       description: string,
-      defaultValue?: any
+      defaultValue?: any,
     ): this;
     action(fn: (...args: any[]) => void | Promise<void>): this;
     parse(argv: string[]): this;
@@ -186,33 +186,33 @@ declare module "commander" {
     helpOption(flags: string, description: string): this;
     addHelpCommand(
       enableOrNameAndArgs?: boolean | string,
-      description?: string
+      description?: string,
     ): this;
-    on(event: "command:*", listener: (operands: string[]) => void): this;
+    on(event: 'command:*', listener: (operands: string[]) => void): this;
     on(event: string, listener: (...args: any[]) => void): this;
     commands: Command[];
   }
 }
 
 // Declare cli-table3 module
-declare module "cli-table3" {
+declare module 'cli-table3' {
   interface TableConstructorOptions {
     head?: string[];
     chars?: {
       top?: string;
-      "top-mid"?: string;
-      "top-left"?: string;
-      "top-right"?: string;
+      'top-mid'?: string;
+      'top-left'?: string;
+      'top-right'?: string;
       bottom?: string;
-      "bottom-mid"?: string;
-      "bottom-left"?: string;
-      "bottom-right"?: string;
+      'bottom-mid'?: string;
+      'bottom-left'?: string;
+      'bottom-right'?: string;
       left?: string;
-      "left-mid"?: string;
+      'left-mid'?: string;
       mid?: string;
-      "mid-mid"?: string;
+      'mid-mid'?: string;
       right?: string;
-      "right-mid"?: string;
+      'right-mid'?: string;
       middle?: string;
     };
     style?: {

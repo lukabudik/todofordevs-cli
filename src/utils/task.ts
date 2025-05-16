@@ -1,8 +1,8 @@
-import inquirer from "inquirer";
-import { get, post, put, del, endpoints } from "./api";
-import * as output from "./output";
-import { requireAuth } from "./auth";
-import { getActiveProjectId } from "./project";
+import inquirer from 'inquirer';
+import { get, post, put, del, endpoints } from './api';
+import * as output from './output';
+import { requireAuth } from './auth';
+import { getActiveProjectId } from './project';
 
 /**
  * Interface for a task
@@ -11,8 +11,8 @@ interface Task {
   id: string;
   title: string;
   description?: string;
-  status: "To Do" | "In Progress" | "Blocked" | "Done";
-  priority: "Low" | "Medium" | "High" | "Urgent";
+  status: 'To Do' | 'In Progress' | 'Blocked' | 'Done';
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
   dueDate?: string;
   assigneeId?: string;
   assigneeEmail?: string;
@@ -41,8 +41,8 @@ interface TaskCreationResponse {
 interface TaskInput {
   title: string;
   description?: string;
-  status: "To Do" | "In Progress" | "Blocked" | "Done";
-  priority: "Low" | "Medium" | "High" | "Urgent";
+  status: 'To Do' | 'In Progress' | 'Blocked' | 'Done';
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
   dueDate?: string;
   assigneeId?: string;
 }
@@ -59,7 +59,7 @@ export async function listTasks(options: any = {}): Promise<Task[]> {
 
     if (!projectId) {
       output.error(
-        "No project specified. Use --project or select an active project."
+        'No project specified. Use --project or select an active project.',
       );
       return [];
     }
@@ -76,23 +76,23 @@ export async function listTasks(options: any = {}): Promise<Task[]> {
 
     // Fetch tasks
     const response = await get<TasksResponse>(
-      endpoints.tasks.list(projectId, params)
+      endpoints.tasks.list(projectId, params),
     );
     const tasks = response.tasks || [];
 
     if (tasks.length === 0) {
-      output.info("No tasks found.");
+      output.info('No tasks found.');
       return [];
     }
 
     // Display tasks in a table
     const table = output.createTable([
-      "ID",
-      "Title",
-      "Status",
-      "Priority",
-      "Assignee",
-      "Due Date",
+      'ID',
+      'Title',
+      'Status',
+      'Priority',
+      'Assignee',
+      'Due Date',
     ]);
 
     tasks.forEach((task) => {
@@ -102,8 +102,8 @@ export async function listTasks(options: any = {}): Promise<Task[]> {
         task.status,
         task.priority,
         output.truncate(
-          task.assigneeEmail || task.assigneeName || "Unassigned",
-          20
+          task.assigneeEmail || task.assigneeName || 'Unassigned',
+          20,
         ),
         output.formatDate(task.dueDate),
       ]);
@@ -112,7 +112,7 @@ export async function listTasks(options: any = {}): Promise<Task[]> {
     console.log(table.toString());
     return tasks;
   } catch (error) {
-    output.error("Failed to fetch tasks.");
+    output.error('Failed to fetch tasks.');
     console.error(error);
     return [];
   }
@@ -130,7 +130,7 @@ export async function addTask(options: any = {}): Promise<void> {
 
     if (!projectId) {
       output.error(
-        "No project specified. Use --project or select an active project."
+        'No project specified. Use --project or select an active project.',
       );
       return;
     }
@@ -139,23 +139,23 @@ export async function addTask(options: any = {}): Promise<void> {
     const taskInput = await promptForTaskDetails();
 
     if (!taskInput) {
-      output.info("Task creation cancelled.");
+      output.info('Task creation cancelled.');
       return;
     }
 
-    output.info("Creating task...");
+    output.info('Creating task...');
 
     // Create the task
     const response = await post<TaskCreationResponse>(
       endpoints.tasks.create(projectId),
-      taskInput
+      taskInput,
     );
 
     output.success(
-      `Task '${response.task.title}' created successfully with ID: ${response.task.id}.`
+      `Task '${response.task.title}' created successfully with ID: ${response.task.id}.`,
     );
   } catch (error) {
-    output.error("Failed to create task.");
+    output.error('Failed to create task.');
     console.error(error);
   }
 }
@@ -173,26 +173,26 @@ export async function viewTask(taskId: string): Promise<void> {
     const task = await get<Task>(endpoints.tasks.get(taskId));
 
     // Display task details
-    output.heading("Task Details");
-    output.formatKeyValue("ID", task.id);
-    output.formatKeyValue("Title", task.title);
-    output.formatKeyValue("Description", task.description || "");
-    output.formatKeyValue("Status", task.status);
-    output.formatKeyValue("Priority", task.priority);
-    output.formatKeyValue("Due Date", output.formatDate(task.dueDate));
+    output.heading('Task Details');
+    output.formatKeyValue('ID', task.id);
+    output.formatKeyValue('Title', task.title);
+    output.formatKeyValue('Description', task.description || '');
+    output.formatKeyValue('Status', task.status);
+    output.formatKeyValue('Priority', task.priority);
+    output.formatKeyValue('Due Date', output.formatDate(task.dueDate));
     output.formatKeyValue(
-      "Assignee",
-      task.assigneeEmail || task.assigneeName || "Unassigned"
+      'Assignee',
+      task.assigneeEmail || task.assigneeName || 'Unassigned',
     );
-    output.formatKeyValue("Project ID", task.projectId);
-    output.formatKeyValue("Project Name", task.projectName || "");
+    output.formatKeyValue('Project ID', task.projectId);
+    output.formatKeyValue('Project Name', task.projectName || '');
     output.formatKeyValue(
-      "Created At",
-      new Date(task.createdAt).toLocaleString()
+      'Created At',
+      new Date(task.createdAt).toLocaleString(),
     );
     output.formatKeyValue(
-      "Updated At",
-      new Date(task.updatedAt).toLocaleString()
+      'Updated At',
+      new Date(task.updatedAt).toLocaleString(),
     );
   } catch (error) {
     output.error(`Failed to fetch task with ID: ${taskId}.`);
@@ -216,17 +216,17 @@ export async function updateTask(taskId: string): Promise<void> {
     const updates = await promptForTaskUpdates(task);
 
     if (!updates) {
-      output.info("Task update cancelled.");
+      output.info('Task update cancelled.');
       return;
     }
 
-    output.info("Updating task...");
+    output.info('Updating task...');
 
     // Update the task
     await put(endpoints.tasks.update(taskId), updates);
 
     output.success(
-      `Task '${updates.title || task.title}' (ID: ${taskId}) updated successfully.`
+      `Task '${updates.title || task.title}' (ID: ${taskId}) updated successfully.`,
     );
   } catch (error) {
     output.error(`Failed to update task with ID: ${taskId}.`);
@@ -242,31 +242,35 @@ export async function deleteTask(taskId: string): Promise<void> {
 
   try {
     // Fetch the task to get its title
-    const task = await get<Task>(endpoints.tasks.get(taskId));
+    let taskTitle = 'Unknown';
+    try {
+      const task = await get<Task>(endpoints.tasks.get(taskId));
+      taskTitle = task.title || 'Unknown';
+    } catch (fetchError) {
+      output.warning(`Could not fetch task details: ${fetchError}`);
+    }
 
     // Confirm deletion
     const { confirm } = await inquirer.prompt([
       {
-        type: "confirm",
-        name: "confirm",
-        message: `Are you sure you want to delete task ${taskId} '${task.title}'?`,
+        type: 'confirm',
+        name: 'confirm',
+        message: `Are you sure you want to delete task ${taskId} '${taskTitle}'?`,
         default: false,
       },
     ]);
 
     if (!confirm) {
-      output.info("Task deletion cancelled.");
+      output.info('Task deletion cancelled.');
       return;
     }
 
-    output.info("Deleting task...");
+    output.info('Deleting task...');
 
     // Delete the task
     await del(endpoints.tasks.delete(taskId));
 
-    output.success(
-      `Task '${task.title}' (ID: ${taskId}) deleted successfully.`
-    );
+    output.success(`Task '${taskTitle}' (ID: ${taskId}) deleted successfully.`);
   } catch (error) {
     output.error(`Failed to delete task with ID: ${taskId}.`);
     console.error(error);
@@ -280,48 +284,48 @@ async function promptForTaskDetails(): Promise<TaskInput | null> {
   try {
     const answers = await inquirer.prompt([
       {
-        type: "input",
-        name: "title",
-        message: "Title:",
-        validate: (input) => input.trim() !== "" || "Title is required",
+        type: 'input',
+        name: 'title',
+        message: 'Title:',
+        validate: (input) => input.trim() !== '' || 'Title is required',
       },
       {
-        type: "input",
-        name: "description",
-        message: "Description (optional):",
+        type: 'input',
+        name: 'description',
+        message: 'Description (optional):',
       },
       {
-        type: "list",
-        name: "status",
-        message: "Status:",
-        choices: ["To Do", "In Progress", "Blocked", "Done"],
-        default: "To Do",
+        type: 'list',
+        name: 'status',
+        message: 'Status:',
+        choices: ['To Do', 'In Progress', 'Blocked', 'Done'],
+        default: 'To Do',
       },
       {
-        type: "list",
-        name: "priority",
-        message: "Priority:",
-        choices: ["Low", "Medium", "High", "Urgent"],
-        default: "Medium",
+        type: 'list',
+        name: 'priority',
+        message: 'Priority:',
+        choices: ['Low', 'Medium', 'High', 'Urgent'],
+        default: 'Medium',
       },
       {
-        type: "input",
-        name: "dueDate",
-        message: "Due Date (YYYY-MM-DD, optional):",
+        type: 'input',
+        name: 'dueDate',
+        message: 'Due Date (YYYY-MM-DD, optional):',
         validate: (input) => {
           if (!input) return true;
           const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
           if (!dateRegex.test(input)) {
-            return "Please use YYYY-MM-DD format";
+            return 'Please use YYYY-MM-DD format';
           }
           const date = new Date(input);
-          return !isNaN(date.getTime()) || "Invalid date";
+          return !isNaN(date.getTime()) || 'Invalid date';
         },
       },
       {
-        type: "input",
-        name: "assigneeId",
-        message: "Assignee ID/Email (optional):",
+        type: 'input',
+        name: 'assigneeId',
+        message: 'Assignee ID/Email (optional):',
       },
     ]);
 
@@ -334,7 +338,7 @@ async function promptForTaskDetails(): Promise<TaskInput | null> {
       assigneeId: answers.assigneeId || undefined,
     };
   } catch (error) {
-    console.error("Error during task creation prompt:", error);
+    console.error('Error during task creation prompt:', error);
     return null;
   }
 }
@@ -343,57 +347,57 @@ async function promptForTaskDetails(): Promise<TaskInput | null> {
  * Prompt for task updates
  */
 async function promptForTaskUpdates(
-  currentTask: Task
+  currentTask: Task,
 ): Promise<TaskInput | null> {
   try {
     const answers = await inquirer.prompt([
       {
-        type: "input",
-        name: "title",
-        message: "Title:",
+        type: 'input',
+        name: 'title',
+        message: 'Title:',
         default: currentTask.title,
-        validate: (input) => input.trim() !== "" || "Title is required",
+        validate: (input) => input.trim() !== '' || 'Title is required',
       },
       {
-        type: "input",
-        name: "description",
-        message: "Description (optional):",
-        default: currentTask.description || "",
+        type: 'input',
+        name: 'description',
+        message: 'Description (optional):',
+        default: currentTask.description || '',
       },
       {
-        type: "list",
-        name: "status",
-        message: "Status:",
-        choices: ["To Do", "In Progress", "Blocked", "Done"],
+        type: 'list',
+        name: 'status',
+        message: 'Status:',
+        choices: ['To Do', 'In Progress', 'Blocked', 'Done'],
         default: currentTask.status,
       },
       {
-        type: "list",
-        name: "priority",
-        message: "Priority:",
-        choices: ["Low", "Medium", "High", "Urgent"],
+        type: 'list',
+        name: 'priority',
+        message: 'Priority:',
+        choices: ['Low', 'Medium', 'High', 'Urgent'],
         default: currentTask.priority,
       },
       {
-        type: "input",
-        name: "dueDate",
-        message: "Due Date (YYYY-MM-DD, optional):",
-        default: currentTask.dueDate || "",
+        type: 'input',
+        name: 'dueDate',
+        message: 'Due Date (YYYY-MM-DD, optional):',
+        default: currentTask.dueDate || '',
         validate: (input) => {
           if (!input) return true;
           const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
           if (!dateRegex.test(input)) {
-            return "Please use YYYY-MM-DD format";
+            return 'Please use YYYY-MM-DD format';
           }
           const date = new Date(input);
-          return !isNaN(date.getTime()) || "Invalid date";
+          return !isNaN(date.getTime()) || 'Invalid date';
         },
       },
       {
-        type: "input",
-        name: "assigneeId",
-        message: "Assignee ID/Email (optional):",
-        default: currentTask.assigneeId || currentTask.assigneeEmail || "",
+        type: 'input',
+        name: 'assigneeId',
+        message: 'Assignee ID/Email (optional):',
+        default: currentTask.assigneeId || currentTask.assigneeEmail || '',
       },
     ]);
 
@@ -406,7 +410,7 @@ async function promptForTaskUpdates(
       assigneeId: answers.assigneeId || undefined,
     };
   } catch (error) {
-    console.error("Error during task update prompt:", error);
+    console.error('Error during task update prompt:', error);
     return null;
   }
 }

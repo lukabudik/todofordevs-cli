@@ -1,12 +1,12 @@
-import open from "open";
-import { get, post, endpoints } from "./api";
+import open from 'open';
+import { get, post, endpoints } from './api';
 import {
   setAuthToken,
   clearAuthToken,
   isAuthenticated,
   getAuthUser,
-} from "../config";
-import * as output from "./output";
+} from '../config';
+import * as output from './output';
 
 /**
  * Interface for the authentication response
@@ -39,19 +39,19 @@ export async function initiateLogin(silent: boolean = false): Promise<void> {
   try {
     // Step 1: Request a device code
     if (!silent) {
-      output.info("Initiating login process...");
+      output.info('Initiating login process...');
     }
 
     const deviceCodeResponse = await post<DeviceCodeResponse>(
-      endpoints.auth.login()
+      endpoints.auth.login(),
     );
 
     // Step 2: Display the verification URI and user code (if not silent)
     if (!silent) {
-      output.heading("Authentication Required");
-      output.info("To authenticate, please follow these steps:");
+      output.heading('Authentication Required');
+      output.info('To authenticate, please follow these steps:');
       output.info(
-        `1. Open this URL in your browser: ${output.truncate(deviceCodeResponse.verification_uri, 50)}`
+        `1. Open this URL in your browser: ${output.truncate(deviceCodeResponse.verification_uri, 50)}`,
       );
       output.info(`2. Enter this code: ${deviceCodeResponse.user_code}`);
 
@@ -59,35 +59,35 @@ export async function initiateLogin(silent: boolean = false): Promise<void> {
       await open(deviceCodeResponse.verification_uri);
 
       // Step 4: Poll for the token
-      output.info("Waiting for authentication to complete...");
+      output.info('Waiting for authentication to complete...');
     }
 
     const token = await pollForToken(
       deviceCodeResponse.device_code,
       deviceCodeResponse.interval,
       deviceCodeResponse.expires_in,
-      silent
+      silent,
     );
 
     // Step 5: Store the token
     if (token) {
       if (!silent) {
-        output.success("Authentication successful!");
+        output.success('Authentication successful!');
         const user = getAuthUser();
         if (user) {
           output.info(
-            `Logged in as ${user.email}${user.name ? ` (${user.name})` : ""}`
+            `Logged in as ${user.email}${user.name ? ` (${user.name})` : ''}`,
           );
         }
       }
     } else {
       if (!silent) {
-        output.error("Authentication failed or timed out.");
+        output.error('Authentication failed or timed out.');
       }
     }
   } catch (error) {
     if (!silent) {
-      output.error("Failed to initiate login process.");
+      output.error('Failed to initiate login process.');
       console.error(error);
     }
     throw error; // Re-throw for silent mode to handle
@@ -105,7 +105,7 @@ async function pollForToken(
   deviceCode: string,
   initialInterval: number,
   expiresIn: number,
-  silent: boolean = false
+  silent: boolean = false,
 ): Promise<boolean> {
   const startTime = Date.now();
   const expiresAt = startTime + expiresIn * 1000;
@@ -122,9 +122,9 @@ async function pollForToken(
 
   if (!silent) {
     progressInterval = setInterval(() => {
-      process.stdout.write("\r");
+      process.stdout.write('\r');
       process.stdout.write(
-        `Waiting for authentication${".".repeat(dots)}${" ".repeat(maxDots - dots)}`
+        `Waiting for authentication${'.'.repeat(dots)}${' '.repeat(maxDots - dots)}`,
       );
       dots = (dots + 1) % (maxDots + 1);
     }, 1000);
@@ -143,14 +143,14 @@ async function pollForToken(
 
         // Check if the user has completed the authentication
         const response = await get<AuthResponse>(
-          endpoints.auth.token(deviceCode)
+          endpoints.auth.token(deviceCode),
         );
 
         if (response && response.token) {
           // Clear the progress indicator (if not silent)
           if (progressInterval) {
             clearInterval(progressInterval);
-            process.stdout.write("\r" + " ".repeat(50) + "\r");
+            process.stdout.write('\r' + ' '.repeat(50) + '\r');
           }
 
           // Store the token and user info
@@ -158,12 +158,12 @@ async function pollForToken(
           return true;
         }
       } catch (error: any) {
-        // If the error is "authorization_pending", continue polling with backoff
+        // If the error is "authorization_pending", continue polling with backoff silently
         if (
           error.response &&
           error.response.status === 400 &&
           error.response.data &&
-          error.response.data.error === "authorization_pending"
+          error.response.data.error === 'authorization_pending'
         ) {
           // Apply exponential backoff, but don't exceed the maximum interval
           interval = Math.min(interval * backoffFactor, maxInterval);
@@ -174,20 +174,21 @@ async function pollForToken(
         if (!silent) {
           if (progressInterval) {
             clearInterval(progressInterval);
-            process.stdout.write("\r" + " ".repeat(50) + "\r");
+            process.stdout.write('\r' + ' '.repeat(50) + '\r');
           }
 
+          // Only show error message for non-authorization_pending errors
           output.warning(
-            `Error polling for token (attempt ${attempts}): ${error.message}`
+            `Error polling for token (attempt ${attempts}): ${error.message}`,
           );
-          output.info("Retrying...");
+          output.info('Retrying...');
 
           // Restart the progress indicator
           dots = 0;
           progressInterval = setInterval(() => {
-            process.stdout.write("\r");
+            process.stdout.write('\r');
             process.stdout.write(
-              `Waiting for authentication${".".repeat(dots)}${" ".repeat(maxDots - dots)}`
+              `Waiting for authentication${'.'.repeat(dots)}${' '.repeat(maxDots - dots)}`,
             );
             dots = (dots + 1) % (maxDots + 1);
           }, 1000);
@@ -198,11 +199,11 @@ async function pollForToken(
     // Clear the progress indicator if we time out (if not silent)
     if (progressInterval) {
       clearInterval(progressInterval);
-      process.stdout.write("\r" + " ".repeat(50) + "\r");
+      process.stdout.write('\r' + ' '.repeat(50) + '\r');
     }
 
     if (!silent) {
-      output.warning("Authentication timed out. Please try again.");
+      output.warning('Authentication timed out. Please try again.');
     }
 
     return false;
@@ -210,7 +211,7 @@ async function pollForToken(
     // Clear the progress indicator if there's an unexpected error (if not silent)
     if (progressInterval) {
       clearInterval(progressInterval);
-      process.stdout.write("\r" + " ".repeat(50) + "\r");
+      process.stdout.write('\r' + ' '.repeat(50) + '\r');
     }
     throw error;
   }
@@ -221,7 +222,7 @@ async function pollForToken(
  */
 export function logout(): void {
   clearAuthToken();
-  output.success("Successfully logged out.");
+  output.success('Successfully logged out.');
 }
 
 /**
@@ -232,10 +233,10 @@ export function checkStatus(): void {
     const user = getAuthUser();
     if (user) {
       output.success(
-        `Logged in as ${user.email}${user.name ? ` (${user.name})` : ""}`
+        `Logged in as ${user.email}${user.name ? ` (${user.name})` : ''}`,
       );
     } else {
-      output.success("Logged in");
+      output.success('Logged in');
     }
   } else {
     output.info("Not logged in. Run 'todo auth login' to authenticate.");
@@ -249,7 +250,7 @@ export function checkStatus(): void {
  */
 export function requireAuth(): boolean {
   if (!isAuthenticated()) {
-    output.error("Authentication required.");
+    output.error('Authentication required.');
     output.info("Please run 'todo auth login' to authenticate.");
     return false;
   }

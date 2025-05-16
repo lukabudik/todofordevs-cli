@@ -1,179 +1,171 @@
 # TodoForDevs CLI
 
-A command-line interface for the TodoForDevs application, allowing developers to manage tasks and projects directly from the terminal.
+`todofordevs` is a command-line interface (CLI) for interacting with [TodoForDevs.com](https://todofordevs.com/), a task management tool designed specifically for developers. This CLI allows you to manage your tasks, projects, and authentication directly from your terminal.
 
-## Overview
+## Table of Contents
 
-TodoForDevs CLI provides a fast, simple way to interact with the TodoForDevs application without leaving your terminal. It follows the core philosophy of the main application: simplicity and efficiency without unnecessary project management overhead.
-
-## Current Status
-
-⚠️ **Important Note:** This CLI is currently in development and requires backend API endpoints that are not yet implemented. See the "Known Issues" section below for details.
+- [Installation](#installation)
+- [Usage](#usage)
+- [Commands](#commands)
+  - [Authentication (`auth`)](#authentication-auth)
+  - [Project Management (`project`)](#project-management-project)
+  - [Task Management (`task`)](#task-management-task)
+- [Global Options](#global-options)
+- [Development](#development)
+- [License](#license)
 
 ## Installation
 
-### Prerequisites
+To install the TodoForDevs CLI, you need Node.js (version >=18.0.0) and pnpm.
 
-- Node.js (v16 or higher)
-- npm or pnpm
+```bash
+pnpm install -g todofordevs
+```
 
-### Local Development Setup
+Alternatively, if you have cloned the repository, you can link it locally for development:
 
-1. Clone the repository:
+```bash
+git clone https://todofordevs.com/ # (Replace with actual repository URL if different)
+cd todofordevs-cli
+pnpm install
+pnpm run build
+pnpm link --global
+```
 
-   ```bash
-   git clone https://github.com/yourusername/todofordevs.git
-   cd todofordevs/cli
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   pnpm install
-   ```
-
-3. Build the CLI:
-
-   ```bash
-   pnpm build
-   ```
-
-4. Link the CLI globally (optional):
-   ```bash
-   pnpm link
-   ```
+After installation, you can use the `todo` command.
 
 ## Usage
 
-### Authentication
+The basic syntax for the CLI is:
 
 ```bash
-# Log in to TodoForDevs
-todo auth login
-
-# Check authentication status
-todo auth status
-
-# Log out
-todo auth logout
+todo [command] [subcommand] [options]
 ```
 
-### Project Management
+To see a list of all available commands, run:
 
 ```bash
-# List all accessible projects
-todo project list
-
-# Select an active project
-todo project select
-
-# Show the currently active project
-todo project current
+todo --help
 ```
 
-### Task Management
+Or for a specific command:
 
 ```bash
-# List tasks in the active project
-todo task list
-
-# List tasks with filtering
-todo task list --status "In Progress" --priority "High"
-
-# Add a new task (interactive prompts will follow)
-todo task add
-
-# View task details
-todo task view <task_id>
-
-# Update a task (interactive prompts will follow)
-todo task update <task_id>
-
-# Delete a task
-todo task delete <task_id>
+todo <command> --help
 ```
 
-### Shortcuts
+## Commands
 
-```bash
-# Shortcut for 'todo task add'
-todo add
+The CLI is organized into several command groups:
 
-# Shortcut for 'todo task list'
-todo tasks
-```
+### Authentication (`auth`)
 
-## Known Issues
+Manage your TodoForDevs account session.
 
-1. **Backend API Endpoints**:
+- **`todo auth login`**
 
-   - The CLI attempts to connect to `http://localhost:3000/api/auth/cli-login-initiate` for authentication, but this endpoint is not yet implemented in the backend.
-   - To use the CLI, you need to start the TodoForDevs backend server and implement the required endpoints.
+  - Description: Log in to TodoForDevs. This will typically open a browser window for authentication.
+  - Usage: `todo auth login`
 
-2. **Error Handling**:
-   - Error messages can be verbose and not user-friendly.
-   - We're working on improving error handling to provide more concise, helpful messages.
+- **`todo auth logout`**
 
-## Required Backend Endpoints
+  - Description: Log out from TodoForDevs, clearing your local session.
+  - Usage: `todo auth logout`
 
-For the CLI to function properly, the following API endpoints need to be implemented in the TodoForDevs backend:
+- **`todo auth status`**
+  - Description: Check your current authentication status.
+  - Usage: `todo auth status`
 
-- **Authentication**:
+### Project Management (`project`)
 
-  - `POST /api/auth/cli-login-initiate` - Initiates the CLI login process
-  - `GET /api/auth/cli-token?code=<device_code>` - Polls for authentication token
+Manage your projects.
 
-- **Projects**:
+- **`todo project list`** (Alias: `ls`)
 
-  - `GET /api/projects` - Lists all accessible projects
-  - `GET /api/projects/[projectId]` - Gets details for a specific project
+  - Description: List all projects you have access to.
+  - Usage: `todo project list`
 
-- **Tasks**:
-  - `GET /api/projects/[projectId]/tasks` - Lists tasks for a project
-  - `POST /api/projects/[projectId]/tasks` - Creates a new task
-  - `GET /api/tasks/[taskId]` - Gets details for a specific task
-  - `PUT /api/tasks/[taskId]` - Updates a task
-  - `DELETE /api/tasks/[taskId]` - Deletes a task
+- **`todo project select`**
+
+  - Description: Select an active project. Tasks will be managed within this project by default.
+  - Usage: `todo project select` (This will likely present an interactive prompt)
+
+- **`todo project current`**
+
+  - Description: Show the currently selected active project.
+  - Usage: `todo project current`
+
+### Task Management (`task`)
+
+Manage tasks within your projects.
+
+- **`todo task list`** (Alias: `ls`)
+
+  - Description: List tasks for the active project.
+  - Usage: `todo task list [options]`
+  - Options:
+    - `-p, --project <id>`: Project ID to list tasks from (overrides the active project).
+    - `-s, --status <status>`: Filter tasks by status (e.g., "todo", "inprogress", "done").
+    - `-r, --priority <priority>`: Filter tasks by priority (e.g., "high", "medium", "low").
+    - `-a, --assignee <assignee>`: Filter tasks by assignee (user ID or name).
+    - `--sort-by <field>`: Field to sort tasks by (e.g., "createdAt", "priority", "status").
+    - `--sort-order <order>`: Sort order ("asc" or "desc").
+  - Shortcut: `todo tasks [options]`
+
+- **`todo task add`**
+
+  - Description: Add a new task to the active project. This will likely prompt for task details.
+  - Usage: `todo task add [options]`
+  - Options:
+    - `-p, --project <id>`: Project ID to add the task to (overrides the active project).
+  - Shortcut: `todo add [options]`
+
+- **`todo task view <taskId>`**
+
+  - Description: View detailed information about a specific task.
+  - Usage: `todo task view <taskId>`
+
+- **`todo task update <taskId>`**
+
+  - Description: Update an existing task. This will likely prompt for the fields to update.
+  - Usage: `todo task update <taskId>`
+
+- **`todo task delete <taskId>`** (Alias: `rm`)
+  - Description: Delete a task.
+  - Usage: `todo task delete <taskId>`
+
+## Global Options
+
+- **`-h, --help`**: Display help for the command.
 
 ## Development
 
-### Project Structure
+This project is built with TypeScript.
 
-```
-cli/
-├── src/                  # Source code
-│   ├── commands/         # Command implementations
-│   │   ├── auth.ts       # Authentication commands
-│   │   ├── project.ts    # Project management commands
-│   │   └── task.ts       # Task management commands
-│   ├── utils/            # Utility functions
-│   │   ├── api.ts        # API client
-│   │   ├── auth.ts       # Authentication utilities
-│   │   ├── output.ts     # Output formatting
-│   │   └── project.ts    # Project utilities
-│   ├── config/           # Configuration management
-│   │   └── index.ts      # Configuration utilities
-│   ├── types.d.ts        # Type declarations
-│   └── index.ts          # CLI entry point
-├── dist/                 # Compiled JavaScript
-├── package.json          # Project metadata and dependencies
-└── tsconfig.json         # TypeScript configuration
-```
+**Prerequisites:**
 
-### Scripts
+- Node.js (>=18.0.0)
+- pnpm
 
-- `pnpm build` - Builds the CLI
-- `pnpm start` - Runs the CLI
-- `pnpm dev` - Builds and runs the CLI
-- `pnpm link` - Links the CLI globally
+**Setup:**
 
-## Next Steps
+1. Clone the repository: `git clone <repository_url>` (Replace with actual URL)
+2. Navigate to the project directory: `cd todofordevs-cli`
+3. Install dependencies: `pnpm install`
 
-1. Implement the required backend API endpoints
-2. Improve error handling and user feedback
-3. Add comprehensive documentation
-4. Add tests
+**Available Scripts (from `package.json`):**
+
+- `pnpm run build`: Compile TypeScript to JavaScript (output to `dist/`).
+- `pnpm run start`: Run the compiled CLI (requires a prior build).
+- `pnpm run dev`: Compile TypeScript and then run the CLI (useful for development).
+- `pnpm run format`: Format code using Prettier.
+- `pnpm run format:check`: Check code formatting with Prettier.
+- `pnpm run lint`: Lint code using ESLint.
+- `pnpm run lint:fix`: Lint code and automatically fix issues.
+- `pnpm link --global`: Make the `todo` command available globally by linking the local build. This is useful for testing the CLI as if it were installed.
+
+The main entry point for the CLI is `src/index.ts`. Commands are defined in the `src/commands/` directory. Utility functions are located in `src/utils/`.
 
 ## License
 
-ISC
+This project is licensed under the terms specified in [https://todofordevs.com/terms](https://todofordevs.com/terms).

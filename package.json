@@ -29,7 +29,7 @@
   "homepage": "https://todofordevs.com/",
   "repository": {
     "type": "git",
-    "url": "https://todofordevs.com/"
+    "url": "https://github.com/lukabudik/todofordevs-cli"
   },
   "bugs": {
     "url": "https://todofordevs.com/"
