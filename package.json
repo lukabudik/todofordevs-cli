@@ -1,6 +1,6 @@
 {
   "name": "todofordevs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CLI for TodoForDevs - A simple task management tool for developers",
   "main": "dist/index.js",
   "bin": {
