@@ -58,6 +58,7 @@
     "axios": "^1.9.0",
     "chalk": "4",
     "cli-table3": "^0.6.5",
+    "clipboardy": "^4.0.0",
     "commander": "^13.1.0",
     "conf": "10",
     "inquirer": "^12.6.1",

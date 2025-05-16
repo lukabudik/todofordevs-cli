@@ -1,4 +1,5 @@
 import open from 'open';
+import clipboardy from 'clipboardy';
 import { get, post, endpoints } from './api';
 import {
   setAuthToken,
@@ -53,7 +54,17 @@ export async function initiateLogin(silent: boolean = false): Promise<void> {
       output.info(
         `1. Open this URL in your browser: ${output.truncate(deviceCodeResponse.verification_uri, 50)}`,
       );
-      output.info(`2. Enter this code: ${deviceCodeResponse.user_code}`);
+
+      // Copy the code to clipboard
+      try {
+        await clipboardy.write(deviceCodeResponse.user_code);
+        output.info(
+          `2. Enter this code: ${deviceCodeResponse.user_code} (copied to clipboard)`,
+        );
+      } catch (clipboardError) {
+        // Fallback if clipboard access fails
+        output.info(`2. Enter this code: ${deviceCodeResponse.user_code}`);
+      }
 
       // Step 3: Open the browser to the verification URI (if not silent)
       await open(deviceCodeResponse.verification_uri);
