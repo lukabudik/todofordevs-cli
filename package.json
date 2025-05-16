@@ -1,5 +1,5 @@
 {
-  "name": "todofordevs-cli",
+  "name": "todofordevs",
   "version": "1.0.0",
   "description": "CLI for TodoForDevs - A simple task management tool for developers",
   "main": "dist/index.js",
@@ -12,7 +12,11 @@
     "dev": "tsc && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postbuild": "chmod +x dist/index.js",
-    "link": "npm link"
+    "link": "npm link",
+    "format": "prettier --write \"src/**/*.ts\" \"*.json\" \"*.md\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"*.json\" \"*.md\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "keywords": [
     "todo",
@@ -20,12 +24,35 @@
     "task-management",
     "developers"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "Luka Budík",
+  "license": "SEE LICENSE IN https://todofordevs.com/terms",
+  "homepage": "https://todofordevs.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://todofordevs.com/"
+  },
+  "bugs": {
+    "url": "https://todofordevs.com/"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "packageManager": "pnpm@10.6.1",
   "devDependencies": {
     "@types/node": "^22.15.18",
-    "typescript": "^5.8.3"
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.8.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^7.18.0"
   },
   "dependencies": {
     "axios": "^1.9.0",
